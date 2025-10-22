@@ -1,0 +1,19 @@
+<!doctype html>
+<html>
+<head><title>Trendy Dashboard</title></head>
+<body>
+<h1>Latest Trends</h1>
+<ul>
+{% for trend in trends %}
+<li>{{ trend.niche.name }} - {{ trend.keywords }} ({{ trend.sentiment }})</li>
+{% endfor %}
+</ul>
+
+<h2>Top Keywords</h2>
+<ul>
+{% for k in keywords %}
+<li>{{ k.keyword }} — {{ k.performance_score }}</li>
+{% endfor %}
+</ul>
+</body>
+</html>
