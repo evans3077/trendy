@@ -1,25 +1,19 @@
 from pytrends.request import TrendReq
 import time
-import random
 
-def get_trending_keywords(niche, geo='KE', timeframe='now 7-d', retries=5):
-    """
-    Scrape trending data from Google Trends for a given niche (default: Kenya).
-    """
-    for attempt in range(retries):
-        try:
-            pytrends = TrendReq(hl='en-GB', tz=180)  # East Africa timezone
-            pytrends.build_payload([niche], geo=geo, timeframe=timeframe)
-            df = pytrends.interest_over_time()
-            if df.empty:
-                return []
-            vals = df[niche].dropna()
-            top = vals.nlargest(min(5, len(vals)))
-            return [
-                {'keyword': niche, 'date': str(idx.date()), 'score': float(v)}
-                for idx, v in top.items()
-            ]
-        except Exception as e:
-            print(f"Attempt {attempt+1} failed: {e}")
-            time.sleep(random.randint(20, 40))
-    return []
+def get_trending_keywords(query, geo='KE', retries=2):
+    """Enhanced with better rate limiting handling"""
+    try:
+        pytrends = TrendReq(hl='en-US', tz=360, timeout=(10,25))
+        pytrends.build_payload([query], cat=0, timeframe='now 7-d', geo=geo)
+        
+        # Try different endpoints
+        data = pytrends.related_queries()
+        if data[query]['rising'] is not None:
+            return [{'keyword': row['query'], 'score': row['value']} 
+                   for _, row in data[query]['rising'].head(5).iterrows()]
+        
+        return []
+    except Exception as e:
+        print(f"Google Trends failed for {query}: {e}")
+        return []

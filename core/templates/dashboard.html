@@ -1,19 +1,35 @@
 <!doctype html>
 <html>
-<head><title>Trendy Dashboard</title></head>
+<head>
+    <title>Trendy Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .trend-item { border: 1px solid #ddd; padding: 10px; margin: 5px 0; }
+        .positive { background-color: #e8f5e8; }
+        .negative { background-color: #ffe8e8; }
+    </style>
+</head>
 <body>
-<h1>Latest Trends</h1>
-<ul>
-{% for trend in trends %}
-<li>{{ trend.niche.name }} - {{ trend.keywords }} ({{ trend.sentiment }})</li>
-{% endfor %}
-</ul>
+    <h1>Latest Trends</h1>
+    
+    {% for trend in trends %}
+    <div class="trend-item {% if trend.sentiment > 0.6 %}positive{% elif trend.sentiment < 0.4 %}negative{% endif %}">
+        <strong>{{ trend.niche.name }}</strong><br>
+        Keywords: {{ trend.keywords|join:", " }}<br>
+        Sentiment: {{ trend.sentiment|floatformat:2 }} | Score: {{ trend.score|floatformat:2 }}<br>
+        <small>{{ trend.created_at }}</small>
+    </div>
+    {% empty %}
+    <p>No trends yet. Run the scraping task to populate data.</p>
+    {% endfor %}
 
-<h2>Top Keywords</h2>
-<ul>
-{% for k in keywords %}
-<li>{{ k.keyword }} — {{ k.performance_score }}</li>
-{% endfor %}
-</ul>
+    <h2>Top Keywords for Advertising</h2>
+    <ul>
+    {% for k in keywords %}
+        <li>{{ k.keyword }} — Score: {{ k.performance_score|floatformat:2 }}</li>
+    {% empty %}
+        <li>No keywords available</li>
+    {% endfor %}
+    </ul>
 </body>
 </html>
